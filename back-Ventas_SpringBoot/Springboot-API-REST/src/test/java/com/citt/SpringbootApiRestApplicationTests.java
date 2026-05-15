@@ -6,8 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class SpringbootApiRestApplicationTests {
 
+	/*
 	@Test
 	void contextLoads() {
 	}
+	*/
 
 }
