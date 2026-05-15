@@ -45,15 +45,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './front_despacho/package-lock.json'
 
-      - name: Install Dependencies
-        run: |
-          cd front_despacho
-          npm install
-
       - name: Run Frontend Tests
         run: |
           cd front_despacho
-          npm test -- --watchAll=false --passWithNoTests
+          npm install
+          npm test
 
   # --- TRABAJO 3: DOCKER BUILD (VERIFICAR COMPILACIÓN) ---
   docker-build:
