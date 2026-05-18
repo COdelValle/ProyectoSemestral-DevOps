@@ -195,7 +195,8 @@ resource "aws_ecs_task_definition" "app" {
         { name = "DB_PORT", value = "3306" },
         { name = "DB_NAME", value = "ventas_db" },
         { name = "DB_USERNAME", value = "root" },
-        { name = "DB_PASSWORD", value = var.db_password }
+        { name = "DB_PASSWORD", value = var.db_password },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.db.private_ip}:3306/ventas_db?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true" }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -216,7 +217,8 @@ resource "aws_ecs_task_definition" "app" {
         { name = "DB_PORT", value = "3306" },
         { name = "DB_NAME", value = "despachos_db" },
         { name = "DB_USERNAME", value = "root" },
-        { name = "DB_PASSWORD", value = var.db_password }
+        { name = "DB_PASSWORD", value = var.db_password },
+        { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_instance.db.private_ip}:3306/despachos_db?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true" }
       ]
       logConfiguration = {
         logDriver = "awslogs"
