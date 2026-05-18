@@ -3,39 +3,42 @@ services:
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  despacho:
-    build: ./back-Despachos_SpringBoot\Springboot-API-REST-DESPACHO
-    image: despacho-backend:1.0
+  venta:
+    build: ./back-Ventas_SpringBoot/Springboot-API-REST
+    image: venta-backend:1.0
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_ENDPOINT: mysql
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE_VENTAS}
+      DB_USERNAME: ${MYSQL_USERNAME}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     depends_on:
       mysql:
         condition: service_healthy
 
-  venta:
-    build: ./back-Ventas_SpringBoot\Springboot-API-REST
-    image: venta-backend:1.0
+  despacho:
+    build: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+    image: despacho-backend:1.0
     ports:
-      - "8081:8080"
+      - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_ENDPOINT: mysql
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE_DESPACHOS}
+      DB_USERNAME: ${MYSQL_USERNAME}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     depends_on:
       mysql:
         condition: service_healthy
