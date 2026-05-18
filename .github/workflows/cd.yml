@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  CLUSTER: devops-u2-cluster
+  CLUSTER: innovatech-cluster
   SERVICE: app
 
 jobs:
@@ -67,25 +67,25 @@ jobs:
       - name: Build y Push Ventas Backend
         run: |
           docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/devops-u2-ventas-backend:latest \
+          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-ventas-backend:latest \
           ./back-Ventas_SpringBoot/Springboot-API-REST
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/devops-u2-ventas-backend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-ventas-backend:latest
 
       # --- 5. BUILD Y PUSH DOCKER: BACKEND DESPACHOS ---
       - name: Build y Push Despacho Backend
         run: |
           docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/devops-u2-despacho-backend:latest \
+          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-despacho-backend:latest \
           ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/devops-u2-despacho-backend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-despacho-backend:latest
 
       # --- 6. BUILD Y PUSH DOCKER: FRONTEND ---
       - name: Build y Push Frontend
         run: |
           docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/devops-u2-frontend:latest \
+          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest \
           ./front_despacho
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/devops-u2-frontend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest
 
       # --- 7. REDESPLIEGUE EN ECS ---
       - name: Forzar redespliegue en ECS
