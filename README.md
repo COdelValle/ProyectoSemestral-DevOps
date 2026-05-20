@@ -287,7 +287,7 @@ docker-compose down -v
 4. **Aplicar la infraestructura**
    Para este paso, primero tenemos que acceder al laboratorio AWS y crear un par de llaves.
    ```bash
-   terraform apply -var="key_pair_name=TU_LLAVE_AWS" -var="db_password=Despacho2026."
+   terraform apply -var="key_pair_name=despacho" -var="db_password=Despacho2026."
    ```
 
 5. **Obtener salidas**
