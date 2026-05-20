@@ -188,7 +188,7 @@ Código Terraform que automatiza el despliegue en AWS, incluyendo redes, segurid
 #### Local (Docker Compose)
 - Docker Desktop instalado y ejecutándose
 - Git
-- Archivo `.env` con las siguientes variables:
+- Archivo `.env` con las siguientes variables (En ese caso no se necesita crear, ya que esta incluido en el proyecto, si embargo en casos formales, esto si tendria que crearse):
   ```
   MYSQL_ROOT_PASSWORD=tu_contraseña
   MYSQL_USERNAME=root
@@ -279,26 +279,18 @@ docker-compose down -v
    terraform init
    ```
 
-3. **Crear archivo `terraform.tfvars`**
-   ```hcl
-   aws_region       = "us-east-1"
-   project_name     = "despacho-sistema"
-   key_pair_name    = "tu-key-pair"
-   db_password      = "TuContraseña123!"
-   ```
-
-4. **Validar la configuración**
+3. **Validar la configuración**
    ```bash
-   terraform validate
    terraform plan
    ```
 
-5. **Aplicar la infraestructura**
+4. **Aplicar la infraestructura**
+   Para este paso, primero tenemos que acceder al laboratorio AWS y crear un par de llaves.
    ```bash
-   terraform apply
+   terraform apply -var="key_pair_name=TU_LLAVE_AWS" -var="db_password=Despacho2026."
    ```
 
-6. **Obtener salidas**
+5. **Obtener salidas**
    ```bash
    terraform output
    ```
@@ -582,16 +574,6 @@ docker-compose logs --tail 100
   - Intervalo: 10 segundos
   - Timeout: 5 segundos
   - Reintentos: 5
-
----
-
-## 📚 Referencias
-
-- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-- [React Documentation](https://react.dev)
-- [Docker Documentation](https://docs.docker.com)
-- [Terraform Documentation](https://www.terraform.io/docs)
-- [AWS Documentation](https://docs.aws.amazon.com)
 
 ---
 
