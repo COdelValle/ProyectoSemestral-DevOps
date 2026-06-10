@@ -1,0 +1,15 @@
+resource "kubernetes_persistent_volume_claim" "pvc_despachos" {
+  metadata {
+    name      = "pvc-base-datos-${var.project_name}"
+    namespace = "default"
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    storage_class_name = kubernetes_storage_class.ebs_sc.metadata[0].name
+    resources {
+      requests = {
+        storage = "10Gi"
+      }
+    }
+  }
+}
