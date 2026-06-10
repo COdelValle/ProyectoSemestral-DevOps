@@ -8,10 +8,10 @@ resource "aws_eks_cluster" "eks" {
 }
 
 resource "aws_eks_addon" "ebs_csi" {
-  cluster_name             = eks.name
+  cluster_name             = aws_eks_cluster.eks.name
   addon_name               = "aws-ebs-csi-driver"
   addon_version            = "v1.30.0-eksbuild.1"
-  service_account_role_arn = aws_iam_role.ebs_csi_role.arn
+  service_account_role_arn = data.aws_iam_role.labrole.arn
 }
 
 resource "aws_eks_node_group" "workers" {

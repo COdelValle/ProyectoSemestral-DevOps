@@ -1,8 +1,8 @@
-resource "kubernetes_storage_class" "ebs_sc" {
+resource "kubernetes_storage_class_v1" "ebs_sc" {
   metadata {
     name = "ebs-gp3"
   }
-  storage_provisioner = "://aws.com"
+  storage_provisioner = "ebs.csi.aws.com"
   volume_binding_mode = "WaitForFirstConsumer"
   parameters = {
     type = "gp3"

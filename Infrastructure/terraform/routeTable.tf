@@ -12,13 +12,12 @@ resource "aws_route_table" "public" {
 }
 
 # ASSOCIATIONS 
-
-resource "aws_route_table_association" "public" {
+resource "aws_route_table_association" "route-1" {
   subnet_id      = aws_subnet.subnet-1.id
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_route_table_association" "public" {
+resource "aws_route_table_association" "route-2" {
   subnet_id      = aws_subnet.subnet-2.id
   route_table_id = aws_route_table.public.id
 }

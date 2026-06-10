@@ -5,13 +5,3 @@ variable "aws_region" {
 variable "project_name" {
   default = "innovatech"
 }
-
-variable "key_pair_name" {
-  description = "Nombre de la clave SSH para la EC2"
-}
-
-variable "db_password" {
-  description = "Contraseña de producción para MySQL"
-  type        = string
-  sensitive   = true
-}
