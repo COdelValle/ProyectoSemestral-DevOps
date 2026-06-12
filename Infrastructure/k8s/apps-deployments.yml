@@ -4,7 +4,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-frontend # Coincide con tu frontend_hpa de Terraform
+  name: deployment-frontend
   namespace: default
 spec:
   replicas: 2
@@ -18,7 +18,8 @@ spec:
     spec:
       containers:
       - name: frontend-container
-        image: tu_id_://amazonaws.com
+        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:
@@ -36,7 +37,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-ventas # Coincide con tu ventas_hpa de Terraform
+  name: deployment-ventas
   namespace: default
 spec:
   replicas: 2
@@ -50,9 +51,20 @@ spec:
     spec:
       containers:
       - name: ventas-container
-        image: tu_id_://amazonaws.com
+        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-ventas-backend
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8081
+        - containerPort: 8080
+        env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/$(DATABASE)
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secretos
+                  key: ROOT_PASSWORD
         resources:
           requests:
             cpu: "100m"
@@ -82,9 +94,10 @@ spec:
     spec:
       containers:
       - name: despacho-container
-        image: tu_id_://amazonaws.com
+        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-despacho-backend
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8082
+        - containerPort: 8081
         resources:
           requests:
             cpu: "100m"

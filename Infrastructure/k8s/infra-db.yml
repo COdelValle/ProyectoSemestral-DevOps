@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-base-datos-proyecto # Este es el nombre que buscará tu Deployment de MySQL
+  name: pvc-base-datos-proyecto
   namespace: default
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: ebs-gp3 # Debe coincidir EXACTAMENTE con el metadata.name de tu StorageClass en Terraform
+  storageClassName: ebs-gp3
   resources:
     requests:
       storage: 10Gi
@@ -31,9 +31,15 @@ spec:
         image: mysql:8.0
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "password_secreto_del_proyecto"
+          valueFrom:
+            secretKeyRef:
+              name: secretos
+              key: ROOT_PASSWORD
         - name: MYSQL_DATABASE
-          value: "bd_sistema"
+          valueFrom:
+            secretKeyRef:
+              name: secretos
+              key: DATABASE
         ports:
         - containerPort: 3306
           name: mysql
@@ -43,7 +49,7 @@ spec:
       volumes:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
-          claimName: pvc-base-datos-proyecto # Llama al PVC declarado arriba
+          claimName: pvc-base-datos-proyecto
 ---
 apiVersion: v1
 kind: Service
@@ -53,5 +59,7 @@ metadata:
 spec:
   ports:
   - port: 3306
+    targetPort: 3306
   selector:
     app: mysql
+  type: ClusterIP
