@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
       - name: frontend-container
-        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend
-        imagePullPolicy: Always
+        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
         resources:
@@ -51,8 +51,8 @@ spec:
     spec:
       containers:
       - name: ventas-container
-        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-ventas-backend
-        imagePullPolicy: Always
+        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-ventas-backend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:
@@ -101,8 +101,8 @@ spec:
     spec:
       containers:
       - name: despacho-container
-        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-despacho-backend
-        imagePullPolicy: Always
+        image: 019874521665.dkr.ecr.us-east-1.amazonaws.com/innovatech-despacho-backend:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8081
         env:

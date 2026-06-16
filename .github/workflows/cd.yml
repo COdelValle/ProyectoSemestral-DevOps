@@ -63,53 +63,55 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # --- 5. BUILD Y PUSH DOCKER: BACKEND VENTAS ---
-      - name: Build y Push Ventas Backend
+      - name: Obtener AWS Account ID y definir variables
         run: |
-          docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-ventas-backend:latest \
-          ./back-Ventas_SpringBoot/Springboot-API-REST
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-ventas-backend:latest
+          echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
+          echo "ECR_REGISTRY=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com" >> $GITHUB_ENV
 
-      # --- 6. BUILD Y PUSH DOCKER: BACKEND DESPACHOS ---
-      - name: Build y Push Despacho Backend
+      # --- 5. BUILD Y PUSH DOCKER ---
+      - name: Build y Push Imágenes
         run: |
-          docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-despacho-backend:latest \
-          ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-despacho-backend:latest
+          # Ventas
+          docker build --platform linux/amd64 -t $ECR_REGISTRY/innovatech-ventas-backend:${{ github.sha }} ./back-Ventas_SpringBoot/Springboot-API-REST
+          docker push $ECR_REGISTRY/innovatech-ventas-backend:${{ github.sha }}
+          
+          # Despachos
+          docker build --platform linux/amd64 -t $ECR_REGISTRY/innovatech-despacho-backend:${{ github.sha }} ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+          docker push $ECR_REGISTRY/innovatech-despacho-backend:${{ github.sha }}
+          
+          # Frontend
+          docker build --platform linux/amd64 -t $ECR_REGISTRY/innovatech-frontend:${{ github.sha }} ./front_despacho
+          docker push $ECR_REGISTRY/innovatech-frontend:${{ github.sha }}
 
-      # --- 7. BUILD Y PUSH DOCKER: FRONTEND ---
-      - name: Build y Push Frontend
-        run: |
-          docker build --platform linux/amd64 \
-          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest \
-          ./front_despacho
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest
-
-      # --- 8. CONECTAR CON EKS ---
+      # --- 6. CONECTAR CON EKS ---
       - name: Update Kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --name ${{ env.CLUSTER }} --region ${{ env.AWS_REGION }}
 
-      # --- 9. DESPLIEGUE EN KUBERNETES ---
+      # --- 7. DESPLIEGUE EN KUBERNETES ---
       - name: Deploy Secrets and Config
         run: |
           kubectl apply -f Infrastructure/k8s/secrets.yml
 
       - name: Deploy Infrastructure and Database
         run: |
-          kubectl apply -f Infrastructure/k8s/infra-db.yaml
+          kubectl apply -f Infrastructure/k8s/infra-db.yml
 
       - name: Deploy Microservices
         run: |
-          kubectl apply -f Infrastructure/k8s/apps-deployments.yaml
+          kubectl apply -f Infrastructure/k8s/apps-deployments.yml
           kubectl apply -f Infrastructure/k8s/apps-services.yml
           kubectl apply -f Infrastructure/k8s/hpas.yml
 
-      # --- 10. FORZAR ACTUALIZACIÓN DE PODS ---
-      - name: Force Rollout to pull new images
+      # --- 8. ACTUALIZACIÓN DE IMÁGENES ---
+      - name: Actualizar imágenes en el clúster
         run: |
-          kubectl rollout restart deployment deployment-despacho
-          kubectl rollout restart deployment deployment-ventas
-          kubectl rollout restart deployment deployment-frontend
+          kubectl set image deployment/deployment-ventas ventas-container=$ECR_REGISTRY/innovatech-ventas-backend:${{ github.sha }}
+          kubectl set image deployment/deployment-despacho despacho-container=$ECR_REGISTRY/innovatech-despacho-backend:${{ github.sha }}
+          kubectl set image deployment/deployment-frontend frontend-container=$ECR_REGISTRY/innovatech-frontend:${{ github.sha }}
+
+      - name: Verificar despliegue (Rollout Status)
+        run: |
+          kubectl rollout status deployment/deployment-ventas
+          kubectl rollout status deployment/deployment-despacho
+          kubectl rollout status deployment/deployment-frontend
