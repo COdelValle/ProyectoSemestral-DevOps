@@ -1,24 +1,24 @@
-name: Despliegue continuo
+name: Despliegue Continuo
 
 on:
   push:
     branches:
       - deploy
-
 env:
   AWS_REGION: us-east-1
   CLUSTER: innovatech-cluster
-  SERVICE: app
 
 jobs:
   deploy:
+    name: Despliegue a AWS EKS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v3
+      # --- 1. DESCARGAR EL CÓDIGO ---
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      # --- 1. COMPILACIÓN DE AMBOS BACKENDS (JAVA/MAVEN) ---
+      # --- 2. COMPILACIÓN DE AMBOS BACKENDS (JAVA/MAVEN) ---
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -38,7 +38,7 @@ jobs:
           chmod +x mvnw
           ./mvnw clean package -DskipTests
 
-      # --- 2. COMPILACIÓN DEL FRONTEND (NODE/VITE) ---
+      # --- 3. COMPILACIÓN DEL FRONTEND (NODE/VITE) ---
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -50,9 +50,9 @@ jobs:
           npm install
           npm run build
 
-      # --- 3. CONFIGURACIÓN DE CREDENCIALES DE AWS ---
-      - name: Configurar las credenciales de AWS
-        uses: aws-actions/configure-aws-credentials@v2
+      # --- 4. CONFIGURAR CREDENCIALES AWS ACADEMY ---
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -63,7 +63,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # --- 4. BUILD Y PUSH DOCKER: BACKEND VENTAS ---
+      # --- 5. BUILD Y PUSH DOCKER: BACKEND VENTAS ---
       - name: Build y Push Ventas Backend
         run: |
           docker build --platform linux/amd64 \
@@ -71,7 +71,7 @@ jobs:
           ./back-Ventas_SpringBoot/Springboot-API-REST
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-ventas-backend:latest
 
-      # --- 5. BUILD Y PUSH DOCKER: BACKEND DESPACHOS ---
+      # --- 6. BUILD Y PUSH DOCKER: BACKEND DESPACHOS ---
       - name: Build y Push Despacho Backend
         run: |
           docker build --platform linux/amd64 \
@@ -79,7 +79,7 @@ jobs:
           ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-despacho-backend:latest
 
-      # --- 6. BUILD Y PUSH DOCKER: FRONTEND ---
+      # --- 7. BUILD Y PUSH DOCKER: FRONTEND ---
       - name: Build y Push Frontend
         run: |
           docker build --platform linux/amd64 \
@@ -87,10 +87,29 @@ jobs:
           ./front_despacho
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/innovatech-frontend:latest
 
-      # --- 7. REDESPLIEGUE EN ECS ---
-      - name: Forzar redespliegue en ECS
+      # --- 8. CONECTAR CON EKS ---
+      - name: Update Kubeconfig for EKS
         run: |
-          aws ecs update-service \
-          --cluster ${{ env.CLUSTER }} \
-          --service ${{ env.SERVICE }} \
-          --force-new-deployment
+          aws eks update-kubeconfig --name ${{ env.CLUSTER }} --region ${{ env.AWS_REGION }}
+
+      # --- 9. DESPLIEGUE EN KUBERNETES ---
+      - name: Deploy Secrets and Config
+        run: |
+          kubectl apply -f Infrastructure/k8s/secrets.yml
+
+      - name: Deploy Infrastructure and Database
+        run: |
+          kubectl apply -f Infrastructure/k8s/infra-db.yaml
+
+      - name: Deploy Microservices
+        run: |
+          kubectl apply -f Infrastructure/k8s/apps-deployments.yaml
+          kubectl apply -f Infrastructure/k8s/apps-services.yml
+          kubectl apply -f Infrastructure/k8s/hpas.yml
+
+      # --- 10. FORZAR ACTUALIZACIÓN DE PODS ---
+      - name: Force Rollout to pull new images
+        run: |
+          kubectl rollout restart deployment deployment-despacho
+          kubectl rollout restart deployment deployment-ventas
+          kubectl rollout restart deployment deployment-frontend
