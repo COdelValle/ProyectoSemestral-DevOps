@@ -56,15 +56,22 @@ spec:
         ports:
         - containerPort: 8080
         env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql:3306/$(DATABASE)
-            - name: SPRING_DATASOURCE_USERNAME
-              value: root
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: secretos
-                  key: ROOT_PASSWORD
+          - name: DB_ENDPOINT
+            value: "mysql"
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: secretos
+                key: DATABASE
+          - name: DB_USERNAME
+            value: "root"
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secretos
+                key: ROOT_PASSWORD
         resources:
           requests:
             cpu: "100m"
@@ -98,6 +105,23 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8081
+        env:
+          - name: DB_ENDPOINT
+            value: "mysql"
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: secretos
+                key: DATABASE
+          - name: DB_USERNAME
+            value: "root"
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secretos
+                key: ROOT_PASSWORD
         resources:
           requests:
             cpu: "100m"
