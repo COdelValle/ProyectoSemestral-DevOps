@@ -112,6 +112,6 @@ jobs:
 
       - name: Verificar despliegue (Rollout Status)
         run: |
-          kubectl rollout restart deployment/deployment-frontend -n default
-          kubectl rollout restart deployment/deployment-ventas -n default
-          kubectl rollout restart deployment/deployment-despacho -n default
+          kubectl rollout status deployment/deployment-ventas
+          kubectl rollout status deployment/deployment-despacho
+          kubectl rollout status deployment/deployment-frontend
