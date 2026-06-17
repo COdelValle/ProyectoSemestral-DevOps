@@ -107,7 +107,7 @@ spec:
         - containerPort: 8081
         env:
           - name: DB_ENDPOINT
-            value: "mysql"
+            value: "mysql-service"
           - name: DB_PORT
             value: "3306"
           - name: DB_NAME
