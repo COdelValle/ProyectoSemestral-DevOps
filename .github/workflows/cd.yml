@@ -115,3 +115,22 @@ jobs:
           kubectl rollout status deployment/deployment-ventas
           kubectl rollout status deployment/deployment-despacho
           kubectl rollout status deployment/deployment-frontend
+
+      # --- 9. OBTENER URL DEL FRONTEND ---
+      - name: Obtener URL del Load Balancer
+        run: |
+          echo "Consultando la URL del Load Balancer a AWS..."
+          
+          # Bucle que espera hasta que AWS asigne el DNS público
+          while [ -z "$(kubectl get svc deployment-frontend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)" ]; do
+            echo "Esperando la asignación del DNS por parte de AWS... (reintentando en 10 segundos)"
+            sleep 10
+          done
+          
+          # Una vez que existe, la guardamos en una variable
+          URL=$(kubectl get svc deployment-frontend -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          
+          echo "====================================================================="
+          echo "✅ DESPLIEGUE COMPLETADO CON ÉXITO"
+          echo "🌍 Accede a tu aplicación aquí: http://$URL"
+          echo "====================================================================="
