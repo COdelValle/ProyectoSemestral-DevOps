@@ -1,0 +1,46 @@
+# ====================================================================
+# 1. FRONTEND
+# ====================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: LoadBalancer
+
+---
+# ====================================================================
+# 2. BACKEND VENTAS
+# ====================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ventas-backend
+spec:
+  selector:
+    app: ventas-backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
+
+---
+# ====================================================================
+# 3. BACKEND DESPACHOS
+# ====================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: despacho-backend
+spec:
+  selector:
+    app: despacho-backend
+  ports:
+    - port: 8081
+      targetPort: 8081
+  type: ClusterIP
