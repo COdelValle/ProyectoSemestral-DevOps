@@ -54,3 +54,35 @@ jobs:
         run: |
           cd front_despacho
           npm test
+      
+      # --- 3. COMPILACIÓN DE AMBOS BACKENDS (JAVA/MAVEN) ---
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build Backends JARs
+        run: |
+          # Compilar backend de Despachos
+          cd back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+          
+          # Compilar backend de Ventas
+          cd ../../back-Ventas_SpringBoot/Springboot-API-REST
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+      
+      # --- 4. COMPILACIÓN DEL FRONTEND (NODE/VITE) ---
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Build Frontend Production
+        run: |
+          cd front_despacho
+          npm install
+          npm run build
