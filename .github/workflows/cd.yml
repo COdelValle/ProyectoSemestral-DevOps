@@ -59,7 +59,7 @@ jobs:
       # --- 5. DESPLIEGUE EN KUBERNETES ---
       - name: Deploy Secrets and Config
         run: |
-          kubectl apply -f Infrastructure/k8s/secrets.yml
+          kubectl apply -f Infrastructure/k8s/secret.yml
 
       - name: Deploy Infrastructure and Database
         run: |
