@@ -117,7 +117,7 @@ docker-compose down -v
 
 ## Levantamiento en AWS
 ### Video de referencia
-[![Ver Video](https://img.youtube.com/vi/0nfRbB7lcHk/0.jpg)](https://www.youtube.com/watch?v=0nfRbB7lcHk)
+[![Ver Video](https://img.youtube.com/vi/RmZhFpGkvWY/0.png)](https://www.youtube.com/watch?v=RmZhFpGkvWY)
 
 ### Qué se despliega en AWS
 - VPC con subnets públicas y route table pública.
