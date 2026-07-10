@@ -1,438 +1,95 @@
 # Proyecto Semestral DevOps - Sistema de Ventas y Despachos
 
-Sistema integral de gestión de ventas y despachos con arquitectura de microservicios, completamente containerizado y desplegable en AWS.
+Sistema de gestión de ventas y despachos con arquitectura de microservicios, contenedores Docker, despliegue local con Docker Compose y despliegue en AWS con Terraform y Kubernetes.
 
----
+## Índice
+- [Resumen ejecutivo](#resumen-ejecutivo)
+- [Diagrama de arquitectura](#diagrama-de-arquitectura)
+- [Tecnologías principales](#tecnologías-principales)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Levantamiento local](#levantamiento-local)
+- [Levantamiento en AWS](#levantamiento-en-aws)
+- [CI/CD](#cicd)
+- [Seguridad, secretos y variables de entorno](#seguridad-secretos-y-variables-de-entorno)
+- [Observabilidad](#observabilidad)
+- [Endpoints y módulos](#endpoints-y-módulos)
+- [Detalles técnicos del proyecto](#detalles-técnicos-del-proyecto)
 
-## 📋 Tabla de Contenidos
+## Resumen ejecutivo
+El proyecto implementa dos microservicios Spring Boot, un frontend React y una capa de infraestructura como código para AWS. El flujo principal es usuario -> frontend -> backends -> base de datos MySQL.
 
-- [Con qué funciona (Stack Tecnológico)](#️-stack-tecnológico)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Cómo se levanta](#-cómo-se-levanta)
-- [Infraestructura Creada](#️-infraestructura-creada)
-- [Configuración](#️-configuración)
-- [Endpoints Disponibles](#-endpoints-disponibles)
----
+En local la solución se levanta con Docker Compose. En AWS el despliegue se orienta a EKS con Terraform, ECR como registro de imágenes, Kubernetes para orquestación y CloudWatch como base de observabilidad.
 
-## 🏗️ Stack Tecnológico
+## Diagrama de arquitectura
 
+![Diagrama de arquitectura](docs/Diagrama%20topología%20AWS%20oscuro.png)
+
+## Tecnologías principales
 ### Backend
-- **Spring Boot 3.4.4** - Framework de aplicaciones Java
-- **Java 17** - Versión requerida
-- **Maven** - Gestor de dependencias y compilación
-- **JPA/Hibernate** - ORM para persistencia de datos
-- **MySQL 8** - Base de datos relacional
-- **Docker** - Contenedorización
+- Spring Boot 3.4.4 para exponer APIs REST y estructurar la lógica de negocio.
+- Java 17 como versión base del runtime.
+- Maven para compilación, empaquetado y pruebas.
+- JPA/Hibernate para persistencia relacional.
+- MySQL 8 como base de datos principal.
+- Swagger/OpenAPI para documentación de servicios.
 
 ### Frontend
-- **React 18.2.0** - Librería de UI
-- **Vite 5.2.0** - Constructor y servidor de desarrollo
-- **Tailwind CSS 3.4.3** - Framework CSS utility-first
-- **React Router DOM 6.24.1** - Enrutamiento
-- **Axios 1.6.8** - Cliente HTTP
-- **React Hook Form 7.52.1** - Gestión de formularios
-- **SweetAlert2 11.11.0** - Alertas personalizadas
+- React 18.2.0 para la interfaz de usuario.
+- Vite 5.2.0 para desarrollo y build rápido.
+- Tailwind CSS 3.4.3 para estilos utilitarios.
+- React Router DOM para navegación.
+- Axios para consumo de APIs.
+- React Hook Form para formularios.
+- SweetAlert2 para retroalimentación visual.
+
+### Infraestructura y operación
+- Docker para contenerización.
+- Docker Compose para entorno local.
+- Terraform para infraestructura como código en AWS.
+- Kubernetes en EKS para despliegue en clúster.
+- ECR para almacenamiento privado de imágenes.
+- CloudWatch para logs base y monitoreo operativo.
+
+## Estructura del proyecto
+### Backend de ventas
+Microservicio REST para ventas, con CRUD, persistencia JPA y pruebas unitarias.
+- Ubicación: [back-Ventas_SpringBoot/Springboot-API-REST](back-Ventas_SpringBoot/Springboot-API-REST)
+- Puerto: 8080
+- Swagger: `/swagger-ui.html`
+
+### Backend de despachos
+Microservicio REST para despachos, con CORS, documentación OpenAPI y pruebas.
+- Ubicación: [back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO](back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO)
+- Puerto: 8081
+- Swagger: `/swagger-ui.html`
+
+### Frontend de despacho
+Aplicación React para consultar ventas, crear despachos y cerrar despachos.
+- Ubicación: [front_despacho](front_despacho)
+- En local se sirve en 3000 mediante Docker Compose.
+- En contenedor se publica por Nginx en el puerto 80.
 
 ### Infraestructura
-- **Docker Compose** - Orquestación local de contenedores
-- **Terraform** - Infraestructura como código (IaC) para AWS
-- **AWS Services**:
-  - VPC - Red virtual privada
-  - EC2 - Instancias de máquinas virtuales
-  - ECS Fargate - Servicio de contenedores serverless
-  - ECR - Registro de contenedores privado
-  - CloudWatch - Monitoreo y logs
+La carpeta `Infrastructure/` concentra Terraform y manifiestos Kubernetes.
+- Terraform: red, clúster, ECR, SG, EBS y CloudWatch.
+- Kubernetes: secreto, base de datos, deployments, services y HPA.
 
----
+## Levantamiento local
+### Video de referencia
+[![Ver Video](https://img.youtube.com/vi/0nfRbB7lcHk/0.jpg)](https://www.youtube.com/watch?v=0nfRbB7lcHk)
 
-## 📁 Estructura del Proyecto
+### Qué levanta localmente
+- MySQL 8 como contenedor.
+- Backend de ventas en 8080.
+- Backend de despachos en 8081.
+- Frontend React servido por Nginx en 3000.
 
-```
-ProyectoSemestral-DevOps/
-│
-├── back-Ventas_SpringBoot/
-│   └── Springboot-API-REST/                    # Microservicio de Ventas
-│       ├── src/
-│       │   ├── main/
-│       │   │   ├── java/com/citt/
-│       │   │   │   ├── SpringbootApiRestApplication.java
-│       │   │   │   ├── controller/
-│       │   │   │   │   └── VentaController.java
-│       │   │   │   ├── persistence/
-│       │   │   │   │   ├── entity/
-│       │   │   │   │   ├── repository/
-│       │   │   │   │   └── services/
-│       │   │   │   ├── exceptions/
-│       │   │   │   │   ├── VentaNotFoundException.java
-│       │   │   │   │   └── RestResponseEntityExceptionHandler.java
-│       │   │   │   ├── config/
-│       │   │   │   │   └── OpenApiConfing.java
-│       │   │   │   └── dto/
-│       │   │   └── resources/
-│       │   │       ├── application.properties
-│       │   │       └── application-test.properties
-│       │   └── test/java/com/citt/
-│       │       ├── SpringbootApiRestApplicationTests.java
-│       │       ├── persistence/services/
-│       │       │   └── VentaServiceTest.java
-│       │       └── controller/
-│       ├── pom.xml
-│       ├── Dockerfile
-│       ├── entrypoint.sh
-│       ├── mvnw
-│       └── mvnw.cmd
-│
-├── back-Despachos_SpringBoot/
-│   └── Springboot-API-REST-DESPACHO/           # Microservicio de Despachos
-│       ├── src/
-│       │   ├── main/
-│       │   │   ├── java/com/citt/
-│       │   │   │   ├── SpringbootApiRestDespachoApplication.java
-│       │   │   │   ├── controller/
-│       │   │   │   │   └── DespachoController.java
-│       │   │   │   ├── persistence/
-│       │   │   │   │   ├── entity/
-│       │   │   │   │   ├── repository/
-│       │   │   │   │   └── services/
-│       │   │   │   ├── exceptions/
-│       │   │   │   │   ├── DespachoNotFoundException.java
-│       │   │   │   │   └── RestResponseEntityExceptionHandler.java
-│       │   │   │   ├── config/
-│       │   │   │   │   ├── CorsConfig.java
-│       │   │   │   │   └── OpenApiConfig.java
-│       │   │   │   └── dto/
-│       │   │   └── resources/
-│       │   │       └── application.properties
-│       │   └── test/java/com/citt/
-│       │       ├── SpringbootApiRestDespachoApplicationTests.java
-│       │       └── controller/
-│       │           └── DespachoControllerTest.java
-│       ├── pom.xml
-│       ├── Dockerfile
-│       ├── entrypoint.sh
-│       ├── mvnw
-│       └── mvnw.cmd
-│
-├── front_despacho/                             # Frontend React
-│   ├── src/
-│   │   ├── main.jsx
-│   │   ├── index.css
-│   │   ├── Routes/
-│   │   │   └── AppRoutes.jsx
-│   │   ├── componentes/
-│   │   │   ├── CrudAdmin.jsx
-│   │   │   ├── CrudAdmin/
-│   │   │   │   ├── CardComponent.jsx
-│   │   │   │   ├── FormDespacho.jsx
-│   │   │   │   ├── FormCierreDespacho.jsx
-│   │   │   │   ├── Modal.jsx
-│   │   │   │   ├── TableDespachos.jsx
-│   │   │   │   ├── TableCompras.jsx
-│   │   │   │   ├── SearchBar.jsx
-│   │   │   │   └── PruebaCards.jsx
-│   │   │   ├── Layouts/
-│   │   │   │   ├── Navbar.jsx
-│   │   │   │   ├── Footer.jsx
-│   │   │   │   ├── Carrusel.jsx
-│   │   │   │   └── Reviews.jsx
-│   │   │   └── __tests__/
-│   │   │       └── CrudAdmin.test.jsx
-│   │   └── assets/
-│   │       └── images/
-│   ├── public/
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   ├── package.json
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   ├── db.json
-│   ├── index.html
-│   └── README.md
-│
-├── Infrastructure/                             # Infraestructura como Código
-│   ├── main.tf                                 # Configuración principal de Terraform
-│   ├── variables.tf                            # Variables y parámetros
-│   └── outputs.tf                              # Salidas de Terraform
-│
-├── docker-compose.yml                          # Orquestación local
-└── README.md                                   # Este archivo
-```
+### Requisitos
+- Docker Desktop instalado y activo.
+- Git instalado.
+- Archivo `.env` en la raíz del proyecto.
 
-### Descripción de Componentes
-
-#### **back-Ventas_SpringBoot**
-Microservicio REST para gestionar ventas. Expone endpoints CRUD y comunica con MySQL.
-- Puerto: `8080`
-- Base de datos: `ventas_db`
-
-#### **back-Despachos_SpringBoot**
-Microservicio REST para gestionar despachos. Implementa CORS y Swagger.
-- Puerto: `8081`
-- Base de datos: `despachos_db`
-
-#### **front_despacho**
-Aplicación React que consume ambos microservicios. Incluye formularios, tablas y componentes interactivos.
-- Puerto: `3000` (local) / `80` (AWS)
-- Construida con Vite, compilada a contenedor con Nginx
-
-#### **Infrastructure**
-Código Terraform que automatiza el despliegue en AWS, incluyendo redes, seguridad y servicios.
-
----
-
-## 🚀 Cómo Se Levanta
-
-### Prerequisitos
-
-#### Local (Docker Compose)
-- Docker Desktop instalado y ejecutándose
-- Git
-- Archivo `.env` con las siguientes variables (En ese caso no se necesita crear, ya que esta incluido en el proyecto, si embargo en casos formales, esto si tendria que crearse):
-  ```
-  MYSQL_ROOT_PASSWORD=tu_contraseña
-  MYSQL_USERNAME=root
-  MYSQL_DATABASE_VENTAS=ventas_db
-  MYSQL_DATABASE_DESPACHOS=despachos_db
-  ```
-
-#### AWS (Terraform)
-- AWS CLI configurado con credenciales
-- Terraform >= 1.0
-- Key pair creado en EC2
-
-### Levantamiento Local con Docker Compose
-
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/tu-usuario/ProyectoSemestral-DevOps.git
-   cd ProyectoSemestral-DevOps
-   ```
-
-2. **Crear archivo `.env`**
-Este paso no es necesario por el momento, ya que al ser un proyecto academico, ya esta subido el archivo `.env`. Sin embargo, el entornos profesionales, esto no es una buena practica, en cuyo caso, este paso SI seria necesario.
-   ```bash
-   cat > .env << EOF
-   MYSQL_ROOT_PASSWORD=password123
-   MYSQL_USERNAME=root
-   MYSQL_DATABASE_VENTAS=ventas_db
-   MYSQL_DATABASE_DESPACHOS=despachos_db
-   EOF
-   ```
-
-3. **Construir e iniciar los servicios**
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Esperar a que los servicios se inicien**
-   - MySQL: http://localhost:3306 (healthcheck: 10 segundos)
-   - Backend Ventas: http://localhost:8080
-   - Backend Despachos: http://localhost:8081
-   - Frontend: http://localhost:3000
-
-5. **Verificar que todo funciona**
-   ```bash
-   # Ver logs de los servicios
-   docker-compose logs -f
-
-   # Verificar servicios en ejecución
-   docker-compose ps
-   ```
-
-6. **Detener los servicios**
-   ```bash
-   docker-compose down
-
-   # Con eliminación de volúmenes
-   docker-compose down -v
-   ```
-
-### Comandos Útiles Docker Compose
-
-```bash
-# Reconstruir imágenes sin caché
-docker-compose build --no-cache
-
-# Ver logs en tiempo real
-docker-compose logs -f [servicio]
-
-# Ejecutar comando en un contenedor
-docker-compose exec [servicio] [comando]
-
-# Escalar un servicio
-docker-compose up -d --scale [servicio]=N
-
-# Eliminar volúmenes
-docker-compose down -v
-```
-
-### Despliegue en AWS con Terraform
-
-1. **Navegar al directorio de infraestructura**
-   ```bash
-   cd Infrastructure
-   ```
-
-2. **Inicializar Terraform**
-   ```bash
-   terraform init
-   ```
-
-3. **Validar la configuración**
-   ```bash
-   terraform plan
-   ```
-
-4. **Aplicar la infraestructura**
-   Para este paso, primero tenemos que acceder al laboratorio AWS y crear un par de llaves.
-   ```bash
-   terraform apply -var="key_pair_name=despacho" -var="db_password=Despacho2026."
-   ```
-
-5. **Obtener salidas**
-   ```bash
-   terraform output
-   ```
-
-### Comandos Útiles Terraform
-
-```bash
-# Mostrar el plan sin aplicar
-terraform plan
-
-# Destruir toda la infraestructura
-terraform destroy
-
-# Mostrar el estado actual
-terraform show
-
-# Refrescar el estado
-terraform refresh
-
-# Obtener una salida específica
-terraform output db_instance_ip
-```
-
----
-
-## 🏛️ Infraestructura Creada
-
-### Arquitectura AWS
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   AWS VPC (10.0.0.0/16)                 │
-│                                                         │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │        Public Subnet (10.0.1.0/24)                 │ │
-│  │                                                    │ │
-│  │  ┌──────────────────────────────────────────────┐  │ │
-│  │  │  ECS Cluster (Fargate)                       │  │ │
-│  │  │  ├─ Ventas Backend (8080)                    │  │ │
-│  │  │  ├─ Despacho Backend (8081)                  │  │ │
-│  │  │  └─ Frontend (80)                            │  │ │
-│  │  └──────────────────────────────────────────────┘  │ │
-│  │                                                    │ │
-│  │  ┌──────────────────────────────────────────────┐  │ │
-│  │  │  EC2 Instance (MySQL)                        │  │ │
-│  │  │  └─ MySQL 8 Docker Container                 │  │ │
-│  │  └──────────────────────────────────────────────┘  │ │
-│  │                                                    │ │
-│  └────────────────────────────────────────────────────┘ │
-│                 ↓ Internet Gateway ↓                    │
-└─────────────────────────────────────────────────────────┘
-              ↓ Route Table / NAT ↓
-            ┌──────────────────────────┐
-            │   Internet (0.0.0.0/0)   │
-            └──────────────────────────┘
-```
-
-### Componentes Terraform
-
-#### **1. Networking (VPC)**
-- VPC principal: `10.0.0.0/16`
-- Subnet pública: `10.0.1.0/24`
-- Internet Gateway para acceso a internet
-- Tabla de rutas pública
-- DNS habilitado
-
-#### **2. Security Groups**
-```
-Ingress Rules:
-├─ Puerto 22 (SSH) - 0.0.0.0/0
-├─ Puerto 80 (HTTP) - 0.0.0.0/0
-├─ Puerto 8080 (Ventas) - 0.0.0.0/0
-├─ Puerto 8081 (Despacho) - 0.0.0.0/0
-└─ Puerto 3306 (MySQL) - Interno (security group)
-
-Egress:
-└─ Todo (0.0.0.0/0)
-```
-
-#### **3. Registros ECR (Elastic Container Registry)**
-Se crean tres repositorios privados:
-- `despacho-sistema-despacho-backend` - Imagen de backend Despacho
-- `despacho-sistema-ventas-backend` - Imagen de backend Ventas
-- `despacho-sistema-frontend` - Imagen de frontend React
-
-#### **4. EC2 Instance - Base de Datos**
-- **Instancia**: `t3.micro` (eligible para free tier)
-- **AMI**: Amazon Linux 2023
-- **Almacenamiento**: 20GB gp3
-- **Software**: Docker preinstalado
-- **Servicio**: MySQL 8 como contenedor Docker
-- **User Data**: Script de inicialización que instala Docker y levanta MySQL
-
-#### **5. ECS Cluster - Fargate**
-- **Cluster**: `despacho-sistema-cluster`
-- **Launch Type**: Fargate (serverless)
-- **Especificaciones**:
-  - CPU: 2048 (2 vCPU)
-  - Memoria: 4096 MB (4 GB)
-- **Servicios**:
-  - Ventas Backend (puerto 8080)
-  - Despacho Backend (puerto 8081)
-  - Frontend (puerto 80)
-- **Dependencias de contenedores**: Frontend espera a que backend esté disponible
-
-#### **6. CloudWatch Logs**
-- Grupo de logs: `/ecs/despacho-sistema`
-- Retención: 7 días
-- Streams por contenedor:
-  - `ventas` - Logs del backend de ventas
-  - `despacho` - Logs del backend de despacho
-  - `frontend` - Logs del frontend
-
-#### **7. IAM Roles**
-- Rol de ejecución: `LabRole` (asumido desde laboratorio AWS)
-- Permisos: Pull de ECR, Write en CloudWatch
-
-### Variables Terraform
-
-| Variable | Descripción | Ejemplo |
-|----------|-------------|---------|
-| `aws_region` | Región AWS | `us-east-1` |
-| `project_name` | Nombre del proyecto | `despacho-sistema` |
-| `key_pair_name` | Key pair para EC2 SSH | `mi-key-pair` |
-| `db_password` | Contraseña de MySQL | `SecurePass123!` |
-
-### Outputs Terraform
-
-```hcl
-ecr_ventas_repository_url   # URL del ECR de ventas
-ecr_despacho_repository_url # URL del ECR de despacho
-ecr_frontend_repository_url # URL del ECR de frontend
-db_instance_ip              # IP privada de la instancia MySQL
-```
-
----
-
-## ⚙️ Configuración
-
-### Variables de Entorno - Docker Compose
-
-`.env` (raíz del proyecto):
+### Variables locales
 ```bash
 MYSQL_ROOT_PASSWORD=password123
 MYSQL_USERNAME=root
@@ -440,142 +97,191 @@ MYSQL_DATABASE_VENTAS=ventas_db
 MYSQL_DATABASE_DESPACHOS=despachos_db
 ```
 
-### Configuración Backend - Spring Boot
+### Pasos de levantamiento local
+1. Clonar el repositorio y ubicarse en la raíz del proyecto.
+2. Verificar que el archivo `.env` exista con las variables anteriores.
+3. Ejecutar `docker-compose up -d`.
+4. Esperar a que MySQL termine su healthcheck.
+5. Validar el acceso a los servicios en `http://localhost:3000`, `http://localhost:8080` y `http://localhost:8081`.
+6. Revisar logs con `docker-compose logs -f`.
+7. Detener todo con `docker-compose down`.
 
-**application.properties** (ambos backends):
-```properties
-spring.datasource.url=jdbc:mysql://${DB_ENDPOINT}:${DB_PORT}/${DB_NAME}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
-spring.jpa.hibernate.ddl-auto=update
-springdoc.swagger-ui.path=/swagger-ui.html
+### Comandos útiles local
+```bash
+docker-compose up -d
+docker-compose logs -f
+docker-compose ps
+docker-compose down
+docker-compose down -v
 ```
 
-Variables inyectadas en runtime:
-- `DB_ENDPOINT` - Host del servidor MySQL
-- `DB_PORT` - Puerto MySQL (3306)
-- `DB_NAME` - Nombre de la base de datos
-- `DB_USERNAME` - Usuario de la BD
-- `DB_PASSWORD` - Contraseña de la BD
+## Levantamiento en AWS
+### Video de referencia
+[![Ver Video](https://img.youtube.com/vi/0nfRbB7lcHk/0.jpg)](https://www.youtube.com/watch?v=0nfRbB7lcHk)
 
-### Configuración Frontend - React
+### Qué se despliega en AWS
+- VPC con subnets públicas y route table pública.
+- EKS con node group administrado.
+- ECR para almacenar imágenes.
+- Deployments, Services, Secret, PVC y HPA en Kubernetes.
+- MySQL como Deployment dentro del clúster, respaldado por EBS vía StorageClass.
 
-**vite.config.js**:
-- Puerto de desarrollo: `5173`
-- Carpeta de salida: `dist`
-- Soporte SWC para compilación rápida
+### Requisitos
+- AWS CLI configurado.
+- Terraform instalado.
+- Credenciales válidas para la cuenta o laboratorio AWS.
+- Acceso a kubectl contra el clúster.
 
-**tailwind.config.js**:
-- Temas y colores personalizados
-- Plugins de extensión
+### Variables y parámetros relevantes
+- `aws_region`: región AWS.
+- `project_name`: prefijo de recursos.
+- `db_password`: contraseña base del despliegue.
+- `key_pair_name`: llave para acceso, si aplica.
 
----
+### Pasos de levantamiento en AWS
+1. Entrar al directorio `Infrastructure/terraform`.
+2. Ejecutar `terraform init`.
+3. Revisar el plan con `terraform plan`.
+4. Aplicar con `terraform apply` usando las variables necesarias.
+5. Obtener salidas con `terraform output`.
+6. Configurar acceso a Kubernetes y validar el clúster.
+7. Aplicar los manifiestos de `Infrastructure/k8s`.
+8. Verificar que los pods, services y HPA queden en estado correcto.
 
-## 📡 Endpoints Disponibles
-
-### Backend Ventas (Puerto 8080)
-
-#### OpenAPI/Swagger
-- **URL**: `http://localhost:8080/swagger-ui.html`
-- **Especificación**: `http://localhost:8080/v3/api-docs`
-
-#### Endpoints Principales
-```
-GET    /api/ventas           # Listar todas las ventas
-GET    /api/ventas/{id}      # Obtener venta por ID
-POST   /api/ventas           # Crear nueva venta
-PUT    /api/ventas/{id}      # Actualizar venta
-DELETE /api/ventas/{id}      # Eliminar venta
-```
-
-### Backend Despacho (Puerto 8081)
-
-#### OpenAPI/Swagger
-- **URL**: `http://localhost:8081/swagger-ui.html`
-- **Especificación**: `http://localhost:8081/v3/api-docs`
-
-#### Endpoints Principales
-```
-GET    /api/despacho           # Listar todos los despachos
-GET    /api/despacho/{id}      # Obtener despacho por ID
-POST   /api/despacho           # Crear nuevo despacho
-PUT    /api/despacho/{id}      # Actualizar despacho
-DELETE /api/despacho/{id}      # Eliminar despacho
-POST   /api/despacho/{id}/cierre  # Cerrar despacho
+### Secuencia técnica sugerida
+```bash
+cd Infrastructure/terraform
+terraform init
+terraform plan
+terraform apply
+terraform output
+kubectl apply -f ../k8s/secret.yml
+kubectl apply -f ../k8s/infra-db.yml
+kubectl apply -f ../k8s/apps-deployments.yml
+kubectl apply -f ../k8s/apps-services.yml
+kubectl apply -f ../k8s/hpas.yml
 ```
 
-#### CORS Configuration
-- Origen permitido: `*` (todos los orígenes)
-- Métodos permitidos: `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`
+## CI/CD
+### Integración continua
+El workflow de CI ejecuta pruebas del backend y del frontend al hacer push o pull request. Esto permite detectar fallos temprano y mantener una validación mínima antes del despliegue.
 
-### Frontend React (Puerto 3000)
+Archivo: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
-- **URL**: `http://localhost:3000`
-- **Rutas principales**:
-  - `/` - Página principal
-  - `/admin` - Panel CRUD de despachos
-  - `/admin/compras` - Tabla de compras
+### Despliegue continuo
+El workflow de CD se activa en la rama `deploy`, construye imágenes Docker, las publica en ECR y aplica manifiestos a EKS. Después actualiza las imágenes de cada Deployment y valida el rollout.
 
----
+Archivo: [`.github/workflows/cd.yml`](.github/workflows/cd.yml)
 
-## 🧪 Testing
+### Justificación de uso
+- CI reduce errores de integración al compilar y testear antes de fusionar cambios.
+- CD reduce trabajo manual y acelera la publicación de versiones.
+- ECR funciona como registro privado y versionado de imágenes.
 
-### Backend - Unit Tests
+## Seguridad, secretos y variables de entorno
+### Seguridad básica implementada
+- Secretos de base de datos almacenados en Kubernetes Secret.
+- Credenciales de AWS inyectadas por GitHub Secrets en el pipeline.
+- Imágenes alojadas en repositorios privados de ECR.
+- Reglas de red controladas por Security Groups y Services de Kubernetes.
 
-**Ventas Backend**:
+### Observación importante
+La configuración de seguridad es funcional para un entorno académico, pero no está endurecida como un entorno productivo. Por ejemplo, el Security Group tiene aperturas amplias y el Secret de Kubernetes está codificado en base64, no cifrado por sí mismo.
+
+### Variables de entorno en local
+- `MYSQL_ROOT_PASSWORD`
+- `MYSQL_USERNAME`
+- `MYSQL_DATABASE_VENTAS`
+- `MYSQL_DATABASE_DESPACHOS`
+
+### Variables de entorno en runtime de backend
+- `DB_ENDPOINT`
+- `DB_PORT`
+- `DB_NAME`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+
+### Justificación de uso
+- Las variables desacoplan configuración y código.
+- Permiten usar la misma imagen en local, CI y AWS.
+- Facilitan cambiar el entorno sin recompilar la aplicación.
+
+## Observabilidad
+### Estado actual
+- Swagger/OpenAPI expone documentación funcional de ambos backends.
+- CloudWatch está declarado como base de logs en Terraform.
+- Kubernetes HPA escala según uso de CPU.
+- Docker Compose permite revisar logs locales por servicio.
+
+### Ruta de consulta de logs
+- Local: `docker-compose logs -f`
+- AWS: CloudWatch Log Group definido en Terraform.
+
+## Endpoints y módulos
+### Backend de ventas
+- `GET /api/v1/ventas`
+- `GET /api/v1/ventas/{id}`
+- `POST /api/v1/ventas`
+- `PUT /api/v1/ventas/{id}`
+- `DELETE /api/v1/ventas/{id}`
+
+### Backend de despachos
+- `GET /api/v1/despachos`
+- `GET /api/v1/despachos/{id}`
+- `POST /api/v1/despachos`
+- `PUT /api/v1/despachos/{id}`
+- `DELETE /api/v1/despachos/{id}`
+
+### Frontend
+- Ruta principal: `/`
+- El frontend contiene la vista de administración y componentes de formulario, tabla y modal.
+
+## Detalles técnicos del proyecto
+### Terraform usado en este repositorio
+- `vpc.tf`: define la VPC principal.
+- `subnets.tf`: crea dos subnets públicas.
+- `igw.tf`: crea el Internet Gateway.
+- `routeTable.tf`: define y asocia la ruta pública.
+- `sg.tf`: define el Security Group principal.
+- `eks.tf`: crea el clúster EKS y el node group.
+- `ecr.tf`: crea los repositorios de imágenes.
+- `ebs.tf`: define la StorageClass `ebs-gp3`.
+- `cloudwatch.tf`: crea el log group.
+- `iam.tf`: referencia el rol `LabRole`.
+
+### Kubernetes usado en este repositorio
+- `secret.yml`: secreto base para credenciales.
+- `infra-db.yml`: PVC, MySQL y service interno.
+- `apps-deployments.yml`: frontend, ventas y despachos.
+- `apps-services.yml`: service LoadBalancer para frontend y ClusterIP para backends.
+- `hpas.yml`: escalado horizontal por CPU.
+
+### Patrones de implementación visibles
+- Arquitectura por microservicios.
+- Separación clara entre frontend, backends y base de datos.
+- Contenerización multistage para reducir la imagen final.
+- Exposición de APIs mediante rutas REST versionadas.
+
+## Testing
+### Backend de ventas
 ```bash
 cd back-Ventas_SpringBoot/Springboot-API-REST
 mvn test
 ```
 
-**Despacho Backend**:
+### Backend de despachos
 ```bash
 cd back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
 mvn test
 ```
 
-### Frontend - Vitest
-
+### Frontend
 ```bash
 cd front_despacho
 npm test
 ```
 
----
+## Notas finales
+- El archivo `.env` está versionado en este proyecto académico, pero en un entorno real debería excluirse del repositorio.
 
-## 📊 Monitoreo y Logs
-
-### Local (Docker Compose)
-
-```bash
-# Ver logs de todos los servicios
-docker-compose logs -f
-
-# Ver logs de un servicio específico
-docker-compose logs -f mysql
-docker-compose logs -f venta
-docker-compose logs -f despacho
-docker-compose logs -f frontend
-
-# Ver últimas 100 líneas
-docker-compose logs --tail 100
-```
-
-### AWS (CloudWatch)
-
-1. Acceder a CloudWatch Console en AWS
-2. Ir a Logs > Log Groups
-3. Seleccionar `/ecs/despacho-sistema`
-4. Ver streams por contenedor
-
-### Healthchecks
-
-- **MySQL**: `mysqladmin ping -h localhost`
-  - Intervalo: 10 segundos
-  - Timeout: 5 segundos
-  - Reintentos: 5
-
----
-
-**Última actualización**: Mayo 2026
-**Versión**: 1.0.0
+**Última actualización**: Julio 2026

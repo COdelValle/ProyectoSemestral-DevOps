@@ -48,6 +48,8 @@ services:
     image: despacho-frontend:1.0
     ports:
       - "3000:80"
+    volumes:
+      - ./front_despacho/nginx.local.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - despacho
       - venta
