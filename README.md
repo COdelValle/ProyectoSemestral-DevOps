@@ -76,7 +76,7 @@ La carpeta `Infrastructure/` concentra Terraform y manifiestos Kubernetes.
 
 ## Levantamiento local
 ### Video de referencia
-[![Ver Video](https://img.youtube.com/vi/0nfRbB7lcHk/0.jpg)](https://www.youtube.com/watch?v=0nfRbB7lcHk)
+[![Ver Video](https://img.youtube.com/vi/BlAY-dXupxo/0.jpg)](https://www.youtube.com/watch?v=BlAY-dXupxo)
 
 ### Qué levanta localmente
 - MySQL 8 como contenedor.
