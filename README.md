@@ -129,8 +129,7 @@ docker-compose down -v
 ### Requisitos
 - AWS CLI configurado.
 - Terraform instalado.
-- Credenciales válidas para la cuenta o laboratorio AWS.
-- Acceso a kubectl contra el clúster.
+- Credenciales válidas para laboratorio AWS.
 
 ### Variables y parámetros relevantes
 - `aws_region`: región AWS.
@@ -144,9 +143,9 @@ docker-compose down -v
 3. Revisar el plan con `terraform plan`.
 4. Aplicar con `terraform apply` usando las variables necesarias.
 5. Obtener salidas con `terraform output`.
-6. Configurar acceso a Kubernetes y validar el clúster.
-7. Aplicar los manifiestos de `Infrastructure/k8s`.
-8. Verificar que los pods, services y HPA queden en estado correcto.
+6. Actualizar los GitHub Secrets.
+7. Re-run job Despliegue Continuo en Github Actions.
+8. Verificar funcionamiento accediendo al Cluster en AWS, entrar a servicios, y entrar a la pagina a través del load balancer.
 
 ### Secuencia técnica sugerida
 ```bash
@@ -155,11 +154,6 @@ terraform init
 terraform plan
 terraform apply
 terraform output
-kubectl apply -f ../k8s/secret.yml
-kubectl apply -f ../k8s/infra-db.yml
-kubectl apply -f ../k8s/apps-deployments.yml
-kubectl apply -f ../k8s/apps-services.yml
-kubectl apply -f ../k8s/hpas.yml
 ```
 
 ## CI/CD
