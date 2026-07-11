@@ -21,7 +21,6 @@ El proyecto implementa dos microservicios Spring Boot, un frontend React y una c
 En local la solución se levanta con Docker Compose. En AWS el despliegue se orienta a EKS con Terraform, ECR como registro de imágenes, Kubernetes para orquestación y CloudWatch como base de observabilidad.
 
 ## Diagrama de arquitectura
-
 ![Diagrama de arquitectura](docs/Diagrama%20topología%20AWS%20oscuro.png)
 
 ## Tecnologías principales
@@ -166,6 +165,8 @@ Archivo: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 El workflow de CD se activa en la rama `deploy`, construye imágenes Docker, las publica en ECR y aplica manifiestos a EKS. Después actualiza las imágenes de cada Deployment y valida el rollout.
 
 Archivo: [`.github/workflows/cd.yml`](.github/workflows/cd.yml)
+
+![Diagrama de flujo Pipelines](docs/Diagrama%20de%20flujo%20pipelines%20oscuro.png)
 
 ### Justificación de uso
 - CI reduce errores de integración al compilar y testear antes de fusionar cambios.
